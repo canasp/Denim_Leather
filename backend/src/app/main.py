@@ -6,9 +6,9 @@ from typing import Annotated
 
 
 class User(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    username: str = Field(index=True)
-    password: int | None = Field(default=None, index=True)
+    id: int 
+    username: str
+    password: int
     
 
 sqlite_file_name = "database.db"
