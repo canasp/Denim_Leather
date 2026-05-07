@@ -42,9 +42,19 @@ SECRET_KEY = "5c17b574606c6e775cb0329fb8d27c8ff816a4eee39f0568c6c2afe5ebe893ea"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+password_hash = PasswordHash.recommended()
+
+DUMMY_HASH = password_hash.hash("dummypassword")
+
+#FUNCTIONS VERIFY HASH PASSWORD
+
+def verify_password(plain_password, hashed_password):
+    return  password_hash.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return password_hash.hash(password)
 
 
 app = FastAPI()
@@ -59,8 +69,7 @@ def on_startup():
 @app.post("/users/")
 def create_user(user: User, session: SessionDep) -> User:
    #hash password    
-    password_hash = PasswordHash.recommended()
-    user.password = password_hash.hash(user.password)
+    user.password = get_password_hash(user.password)
 
     session.add(user)
     session.commit()
@@ -97,5 +106,10 @@ class FormData(BaseModel):
     password: str
 
 @app.post("/login/")
-async def login(data: Annotated[FormData, Form()]):
-    return data
+def login(data: Annotated[FormData, Form()], session: SessionDep):
+    user = session.get(User, user)
+    if not user:
+        verify_password(data.password, DUMMY_HASH)
+        raise HTTPException(status_code=404, detail="User not found")
+    if not verify_password(data.password, user.password):
+        return {"ok": True}
