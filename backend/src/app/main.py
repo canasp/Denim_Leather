@@ -107,7 +107,7 @@ class FormData(BaseModel):
 
 @app.post("/login/")
 def login(data: Annotated[FormData, Form()], session: SessionDep):
-    user = session.get(User, data.user)
+    user = session.get(User, data.username)
     if not user:
         verify_password(data.password, DUMMY_HASH)
         raise HTTPException(status_code=404, detail="User not found")
