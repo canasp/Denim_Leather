@@ -1,22 +1,28 @@
-from fastapi import Depends, FastAPI, HTTPException, Query, Form
+from fastapi import Depends, FastAPI, HTTPException, Query, Form, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 from typing import Annotated
 from pydantic import BaseModel
 from typing import Annotated
+from jwt.exceptions import InvalidTokenError
+from pwdlib import PasswordHash
 
+import jwt
+
+
+#DATABASE
 
 class User(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     username: str = Field(index=True)
-    password: int = Field(default=None, index=True)
-    
+    password: str = Field(default=None, index=True)
+
 
 sqlite_file_name = "database.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 connect_args = {"check_same_thread": False}
 engine = create_engine(sqlite_url, connect_args=connect_args)
-
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
@@ -29,8 +35,21 @@ def get_session():
 
 SessionDep = Annotated[Session, Depends(get_session)]
 
+
+#OAUTH2
+
+SECRET_KEY = "5c17b574606c6e775cb0329fb8d27c8ff816a4eee39f0568c6c2afe5ebe893ea"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
 app = FastAPI()
 
+#ENDPOINTS
 
 @app.on_event("startup")
 def on_startup():
@@ -39,10 +58,11 @@ def on_startup():
 
 @app.post("/users/")
 def create_user(user: User, session: SessionDep) -> User:
-    session.add(user)
+    password_hash = PasswordHash.recommended()
+    session.add(user.id, user.username, password_hash.hash(user.password))
     session.commit()
-    session.refresh(user)
-    return user
+    session.refresh(user.id, user.username, password_hash.hash(user.password))
+    return user.id, user.username, password_hash.hash(user.password)
 
 @app.get("/users/")
 def read_users(
