@@ -58,12 +58,14 @@ def on_startup():
 
 @app.post("/users/")
 def create_user(user: User, session: SessionDep) -> User:
+   #hash password    
     password_hash = PasswordHash.recommended()
-    password = password_hash.hash(user.password)
-    session.add(user.id, user.username, password)
+    user.password = password_hash.hash(user.password)
+
+    session.add(user)
     session.commit()
-    session.refresh(user.id, user.username, password)
-    return user.id, user.username, password
+    session.refresh(user)
+    return user
 
 @app.get("/users/")
 def read_users(
