@@ -107,8 +107,9 @@ class FormData(BaseModel):
 
 @app.post("/login/")
 def login(user: User , session: SessionDep) -> User:
-    userDB = session.get(User, user.username) 
-    print("user",userDB)
+    userDB = session.get(User, user.id) 
+    print("user",user)
+    print("userDB",userDB)
 
     if not userDB:
         verify_password(user.password, DUMMY_HASH)
