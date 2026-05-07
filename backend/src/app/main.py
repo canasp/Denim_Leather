@@ -106,7 +106,7 @@ class FormData(BaseModel):
     password: str
 
 @app.post("/login/")
-def login(data: Annotated[FormData, Form()], session: SessionDep):
+def login(data: Annotated[FormData, Form()], session: SessionDep) -> User:
     user = session.get(User, data.username)
     print("user",user)
     print("data",data)
