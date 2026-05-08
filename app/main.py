@@ -122,9 +122,12 @@ def login(username: str , password: str, session: SessionDep) -> User:
 @app.post("/login/") 
 def login(data: Annotated[FormData, Form()], session: SessionDep) -> User:
     user = session.query(User).filter(User.username == data.username)
-    print("User",User)
+    
     print("data",data)
     print("user",user)
+    print("user_id",user.user_id)
+    print("user_password",user.user_password)
+
     if not user:
         verify_password(data.password, DUMMY_HASH)
         raise HTTPException(status_code=404, detail="User not found")
