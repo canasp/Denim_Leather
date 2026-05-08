@@ -121,7 +121,7 @@ def login(username: str , password: str, session: SessionDep) -> User:
 # LOGIN FORM
 @app.post("/login/") 
 def login(data: Annotated[FormData, Form()], session: SessionDep):
-    user = session.get(User).filter(User.username == data.username).first()
+    user = session.query(User).filter(User.username == data.username).first()
     
     print("data",data)
     print("user",user)
