@@ -105,29 +105,26 @@ class FormData(BaseModel):
     username: str
     password: str
 
-@app.post("/login/")
-def login(user: User , session: SessionDep) -> User:
-    userDB = session.get(User, user.id) 
-    print("user",user)
-    print("userDB",userDB)
 
-    if not userDB:
+# LOGIN JSON BODY
+""" @app.post("/login/") 
+def login(username: str , password: str, session: SessionDep) -> User:
+    user = session.query(User).filter(User.username == username)
+ 
+    if not user:
         verify_password(user.password, DUMMY_HASH)
         raise HTTPException(status_code=404, detail="User not found")
-    if not verify_password(user.password, userDB.password):
-        return {"ok": True}
+    if not verify_password(user.password, password):
+        return {"ok": True} """
 
 
 # LOGIN FORM
-""" @app.post("/login/")
+@app.post("/login/") 
 def login(data: Annotated[FormData, Form()], session: SessionDep) -> User:
-    user = session.get(User, data)
-    userExist = user.username 
-    print("user",userExist)
-    print("data",data)
-    print("password",session.get(User, data.password))
-    if not userExist:
-        verify_password(data.password, DUMMY_HASH)
+    user = session.query(User).filter(User.username == data.username)
+
+    if not user:
+        verify_password(user.password, DUMMY_HASH)
         raise HTTPException(status_code=404, detail="User not found")
-    if not verify_password(data.password, user.password):
-        return {"ok": True} """
+    if not verify_password(user.password, data.password):
+        return {"ok": True}
