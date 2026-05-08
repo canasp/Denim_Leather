@@ -51,7 +51,7 @@ DUMMY_HASH = password_hash.hash("dummypassword")
 #FUNCTIONS VERIFY HASH PASSWORD
 
 def verify_password(plain_password, hashed_password):
-    return  password_hash.verify(plain_password, hashed_password)
+    return password_hash.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
     return password_hash.hash(password)
@@ -127,4 +127,5 @@ def login(data: Annotated[FormData, Form()], session: SessionDep):
         verify_password(data.password, DUMMY_HASH)
         raise HTTPException(status_code=404, detail="User not found")
     if not verify_password(data.password, user.password):
+        print ("plain password",data.password,"hashed_password",user.password)
         return {"ok": True}
