@@ -51,7 +51,7 @@ DUMMY_HASH = password_hash.hash("dummypassword")
 #FUNCTIONS VERIFY HASH PASSWORD
 
 def verify_password(plain_password, hashed_password):
-    return password_hash.verify(plain_password, hashed_password)
+    return  password_hash.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
     return password_hash.hash(password)
@@ -120,12 +120,11 @@ def login(username: str , password: str, session: SessionDep) -> User:
 
 # LOGIN FORM
 @app.post("/login/") 
-def login(data: Annotated[FormData, Form()], session: SessionDep):
-    user = session.query(User).filter(User.username == data.username).first()
-    
+def login(data: Annotated[FormData, Form()], session: SessionDep) -> User:
+    user = session.query(User).filter(User.username == data.username)
+
     if not user:
-        verify_password(data.password, DUMMY_HASH)
+        verify_password(user.password, DUMMY_HASH)
         raise HTTPException(status_code=404, detail="User not found")
-    if not verify_password(data.password, user.password):
-        print ("plain password",data.password,"hashed_password",user.password)
+    if not verify_password(user.password, data.password):
         return {"ok": True}
