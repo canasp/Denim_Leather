@@ -130,5 +130,5 @@ def login(data: Annotated[FormData, Form()], session: SessionDep):
     if not user:
         verify_password(data.password, DUMMY_HASH)
         raise HTTPException(status_code=404, detail="User not found")
-    if not verify_password(data.password, user.user_password):
+    if not verify_password(data.password, user.password):
         return {"ok": True}
